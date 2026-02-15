@@ -112,6 +112,8 @@ export const submitUserForm = async (req, res) => {
 // Admin: Get all user forms with pagination and filtering
 export const getAllUserForms = async (req, res) => {
   try {
+    console.log("hello get all user form ");
+    
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;

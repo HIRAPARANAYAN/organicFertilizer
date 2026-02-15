@@ -10,16 +10,23 @@ export const getAllCustomers = async (req, res) => {
     const { page = 1, limit = 10, search = "" } = req.query;
     const offset = (page - 1) * limit;
 
-    let whereClause = {};
-    if (search) {
-      whereClause = {
-        [Op.or]: [
-          { name: { [Op.iLike]: `%${search}%` } },
-          { email: { [Op.iLike]: `%${search}%` } },
-          { phone: { [Op.iLike]: `%${search}%` } },
-        ],
-      };
-    }
+let whereClause = {
+  role: {
+    [Op.ne]: "admin", // 🔥 admin exclude
+  },
+};
+
+if (search) {
+  whereClause = {
+    ...whereClause,
+    [Op.or]: [
+      { name: { [Op.iLike]: `%${search}%` } },
+      { email: { [Op.iLike]: `%${search}%` } },
+      { phone: { [Op.iLike]: `%${search}%` } },
+    ],
+  };
+}
+
 
     const { count, rows: customers } = await User.findAndCountAll({
       where: whereClause,

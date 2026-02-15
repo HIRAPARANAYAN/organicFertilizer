@@ -21,47 +21,52 @@ router.post("/submit", validateUserForm, submitUserForm);
 // User routes (authentication required)
 router.get("/my-forms", authenticateUser, getUserOwnForms);
 
-// Admin routes (admin authentication required)
-const adminRouter = express.Router();
-adminRouter.use(authenticateAdmin);
 
-// Admin: Get all user forms with filtering and pagination
-adminRouter.get("/", getAllUserForms);
+// Get all user forms
+router.get("/admin", authenticateAdmin, getAllUserForms);
 
-// Admin: Get user form by ID
-adminRouter.get("/:id", getUserFormById);
+// Get user form by ID
+router.get("/admin/:id", authenticateAdmin, getUserFormById);
 
-// Admin: Respond to user form
-adminRouter.post("/:id/respond", [
-  body("adminResponse")
-    .trim()
-    .notEmpty()
-    .withMessage("Response is required")
-    .isLength({ min: 5, max: 2000 })
-    .withMessage("Response must be between 5 and 2000 characters"),
-  
-  body("status")
-    .optional()
-    .isIn(["pending", "in_progress", "resolved", "closed"])
-    .withMessage("Invalid status"),
-], respondToUserForm);
+// Respond to user form
+router.post(
+  "/admin/:id/respond",
+  authenticateAdmin,
+  [
+    body("adminResponse")
+      .trim()
+      .notEmpty()
+      .withMessage("Response is required")
+      .isLength({ min: 5, max: 2000 })
+      .withMessage("Response must be between 5 and 2000 characters"),
 
-// Admin: Update user form status
-adminRouter.put("/:id/status", [
-  body("status")
-    .notEmpty()
-    .withMessage("Status is required")
-    .isIn(["pending", "in_progress", "resolved", "closed"])
-    .withMessage("Invalid status"),
-], updateUserFormStatus);
+    body("status")
+      .optional()
+      .isIn(["pending", "in_progress", "resolved", "closed"])
+      .withMessage("Invalid status"),
+  ],
+  respondToUserForm
+);
 
-// Admin: Delete user form
-adminRouter.delete("/:id", deleteUserForm);
+// Update status
+router.put(
+  "/admin/:id/status",
+  authenticateAdmin,
+  [
+    body("status")
+      .notEmpty()
+      .withMessage("Status is required")
+      .isIn(["pending", "in_progress", "resolved", "closed"])
+      .withMessage("Invalid status"),
+  ],
+  updateUserFormStatus
+);
 
-// Admin: Get user form statistics
-adminRouter.get("/stats/overview", getUserFormStats);
+// Delete
+router.delete("/admin/:id", authenticateAdmin, deleteUserForm);
 
-// Mount admin routes
-router.use("/admin", adminRouter);
+// Stats
+router.get("/admin/stats/overview", authenticateAdmin, getUserFormStats);
+
 
 export default router;

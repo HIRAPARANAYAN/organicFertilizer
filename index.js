@@ -80,7 +80,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({
     success: false,
     message: "Internal server error",
-    error: process.env.NODE_ENV === "development" ? err.message : undefined,
+    error: err?.message,
+    requestId: req.headers["x-request-id"] || undefined,
   });
 });
 
@@ -91,14 +92,21 @@ async function startServer() {
     await sequelize.authenticate();
     console.log("✅ Connected to PostgreSQL via Sequelize");
 
-    await sequelize.sync({ alter: true });
-    console.log("✅ Database models synchronized");
-
     // Start listening
     app.listen(PORT, () => {
       console.log(`🚀 Server is running on http://localhost:${PORT}`);
       console.log(`📝 Environment: ${process.env.NODE_ENV || "development"}`);
     });
+
+    (async () => {
+      try {
+        console.log("ℹ️ Starting database synchronization...");
+        await sequelize.sync({ alter: true });
+        console.log("✅ Database models synchronized");
+      } catch (err) {
+        console.error("❌ Database sync failed:", err?.message || err);
+      }
+    })();
   } catch (error) {
     console.error("❌ Failed to start server:", error);
     process.exit(1);

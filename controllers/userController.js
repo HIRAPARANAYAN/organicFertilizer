@@ -116,6 +116,7 @@ class UserController {
       });
     }
   }
+<<<<<<< HEAD
 
   // Forgot password
   async forgotPassword(req, res) {
@@ -188,6 +189,8 @@ class UserController {
       });
     }
   }
+=======
+>>>>>>> target/main
 }
 
 export default new UserController();

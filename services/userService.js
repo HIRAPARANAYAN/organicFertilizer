@@ -1,13 +1,20 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+<<<<<<< HEAD
 import mailService from "./mailService.js";
+=======
+>>>>>>> target/main
 
 class UserService {
   // Register new user (role: user)
   async register(userData) {
     console.log("Registration attempt with data:", userData);
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> target/main
     const { name, email, password, phone, address, role } = userData;
 
     // Check if user already exists
@@ -31,7 +38,11 @@ class UserService {
       address,
       role: "user"
     });
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> target/main
     const user = await User.create({
       name,
       email,
@@ -40,7 +51,11 @@ class UserService {
       address,
       role: "user", // Always normalize to "user" for consistency
     });
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> target/main
     console.log("User created successfully:", user.id);
 
     // Generate JWT token
@@ -49,7 +64,11 @@ class UserService {
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRE || "7d" }
     );
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> target/main
     console.log("Token generated successfully");
 
     return {
@@ -235,6 +254,7 @@ class UserService {
       throw new Error("Admin not found");
     }
 
+<<<<<<< HEAD
     const { name, email } = adminData;
 
     // If email is being changed, check if it's already taken
@@ -246,6 +266,10 @@ class UserService {
     }
 
     await admin.update({ name, email });
+=======
+    const { name } = adminData;
+    await admin.update({ name });
+>>>>>>> target/main
 
     return {
       id: admin.id,
@@ -255,6 +279,7 @@ class UserService {
       updatedAt: admin.updatedAt,
     };
   }
+<<<<<<< HEAD
 
   // Forgot password - Generate OTP and send email
   async forgotPassword(email, role = "user") {
@@ -334,6 +359,8 @@ class UserService {
       message: "Password has been reset successfully",
     };
   }
+=======
+>>>>>>> target/main
 }
 
 export default new UserService();

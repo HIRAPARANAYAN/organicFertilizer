@@ -43,6 +43,7 @@ const User = sequelize.define(
       allowNull: false,
       defaultValue: true,
     },
+<<<<<<< HEAD
     reset_password_token: {
       type: DataTypes.STRING(255),
       allowNull: true,
@@ -51,6 +52,8 @@ const User = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
+=======
+>>>>>>> target/main
   },
   {
     tableName: "users",

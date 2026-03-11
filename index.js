@@ -1,8 +1,14 @@
+<<<<<<< HEAD
 import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
+=======
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+>>>>>>> target/main
 import { sequelize } from "./config/sequelize.js";
 import "./models/User.js";
 import "./models/Product.js";
@@ -27,6 +33,7 @@ import mediaRoutes from "./routes/mediaRoutes.js";
 import userFormRoutes from "./routes/userFormRoutes.js";
 import ensureUploadsDir from "./middleware/upload.js";
 import couponRoutes from "./routes/couponRoutes.js";
+<<<<<<< HEAD
 import paymentRoutes from "./routes/paymentRoutes.js";
 
 // Load environment variables removed from here as it's now at the top
@@ -72,6 +79,17 @@ app.use(cors({
   origin: allowedOrigins,
   credentials: true
 }));
+=======
+
+// Load environment variables
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(cors());
+>>>>>>> target/main
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(ensureUploadsDir);
@@ -103,7 +121,10 @@ app.use("/api/contact", contactRoutes);
 app.use("/api/media", mediaRoutes);
 app.use("/api/user-forms", userFormRoutes);
 app.use("/api", couponRoutes);
+<<<<<<< HEAD
 app.use("/api/payments", paymentRoutes);
+=======
+>>>>>>> target/main
 
 // 404 handler
 app.use((req, res) => {
@@ -119,8 +140,12 @@ app.use((err, req, res, next) => {
   res.status(500).json({
     success: false,
     message: "Internal server error",
+<<<<<<< HEAD
     error: err?.message,
     requestId: req.headers["x-request-id"] || undefined,
+=======
+    error: process.env.NODE_ENV === "development" ? err.message : undefined,
+>>>>>>> target/main
   });
 });
 
@@ -131,6 +156,7 @@ async function startServer() {
     await sequelize.authenticate();
     console.log("✅ Connected to PostgreSQL via Sequelize");
 
+<<<<<<< HEAD
     // Start listening
     httpServer.listen(PORT, () => {
       console.log(`🚀 Server is running on http://localhost:${PORT}`);
@@ -146,6 +172,16 @@ async function startServer() {
         console.error("❌ Database sync failed:", err?.message || err);
       }
     })();
+=======
+    await sequelize.sync({ alter: true });
+    console.log("✅ Database models synchronized");
+
+    // Start listening
+    app.listen(PORT, () => {
+      console.log(`🚀 Server is running on http://localhost:${PORT}`);
+      console.log(`📝 Environment: ${process.env.NODE_ENV || "development"}`);
+    });
+>>>>>>> target/main
   } catch (error) {
     console.error("❌ Failed to start server:", error);
     process.exit(1);

@@ -1,5 +1,8 @@
 import userService from "../services/userService.js";
+<<<<<<< HEAD
 import { sequelize } from "../config/sequelize.js";
+=======
+>>>>>>> target/main
 import { validationResult } from "express-validator";
 
 class AdminController {
@@ -100,6 +103,7 @@ class AdminController {
       });
     }
   }
+<<<<<<< HEAD
 
   // Forgot password
   async forgotPassword(req, res) {
@@ -191,6 +195,8 @@ class AdminController {
       });
     }
   }
+=======
+>>>>>>> target/main
 }
 
 export default new AdminController();

@@ -172,6 +172,7 @@ export const validateCouponForUser = async (req, res) => {
       }
     }
 
+<<<<<<< HEAD
     // Fetch user's cart for eligibility and discount calculation
     const cart = await Cart.findAll({
       where: { userId },
@@ -236,6 +237,9 @@ export const validateCouponForUser = async (req, res) => {
         finalSubtotal: parseFloat((subtotal - discountAmount).toFixed(2))
       }
     });
+=======
+    res.json({ success: true, data: coupon });
+>>>>>>> target/main
   } catch (error) {
     res.status(500).json({ success: false, message: "Failed to validate coupon", error: error.message });
   }

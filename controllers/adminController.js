@@ -1,4 +1,8 @@
 import userService from "../services/userService.js";
+<<<<<<< HEAD
+import { sequelize } from "../config/sequelize.js";
+=======
+>>>>>>> target/main
 import { validationResult } from "express-validator";
 
 class AdminController {
@@ -99,6 +103,100 @@ class AdminController {
       });
     }
   }
+<<<<<<< HEAD
+
+  // Forgot password
+  async forgotPassword(req, res) {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({
+          success: false,
+          message: "Email is required",
+        });
+      }
+
+      const result = await userService.forgotPassword(email, "admin");
+      res.status(200).json({
+        success: true,
+        message: result.message,
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+
+  // Verify OTP
+  async verifyOTP(req, res) {
+    try {
+      const { email, otp } = req.body;
+      if (!email || !otp) {
+        return res.status(400).json({
+          success: false,
+          message: "Email and OTP are required",
+        });
+      }
+
+      const result = await userService.verifyOTP(email, otp, "admin");
+      res.status(200).json({
+        success: true,
+        message: result.message,
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+
+  // Reset password
+  async resetPassword(req, res) {
+    try {
+      const { email, otp, newPassword } = req.body;
+      if (!email || !otp || !newPassword) {
+        return res.status(400).json({
+          success: false,
+          message: "Email, OTP and new password are required",
+        });
+      }
+
+      const result = await userService.resetPassword(email, otp, newPassword, "admin");
+      res.status(200).json({
+        success: true,
+        message: result.message,
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+
+  async syncDatabase(req, res) {
+    try {
+      const result = await sequelize.sync({ alter: true });
+      res.status(200).json({
+        success: true,
+        message: "Database synchronized successfully",
+        data: {
+          dialect: result.getDialect ? result.getDialect() : "postgres",
+        },
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to synchronize database",
+        error: error.message,
+      });
+    }
+  }
+=======
+>>>>>>> target/main
 }
 
 export default new AdminController();

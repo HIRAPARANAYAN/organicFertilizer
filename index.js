@@ -1,6 +1,14 @@
+<<<<<<< HEAD
+import "dotenv/config";
+import express from "express";
+import { createServer } from "http";
+import { Server } from "socket.io";
+import cors from "cors";
+=======
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+>>>>>>> target/main
 import { sequelize } from "./config/sequelize.js";
 import "./models/User.js";
 import "./models/Product.js";
@@ -25,6 +33,53 @@ import mediaRoutes from "./routes/mediaRoutes.js";
 import userFormRoutes from "./routes/userFormRoutes.js";
 import ensureUploadsDir from "./middleware/upload.js";
 import couponRoutes from "./routes/couponRoutes.js";
+<<<<<<< HEAD
+import paymentRoutes from "./routes/paymentRoutes.js";
+
+// Load environment variables removed from here as it's now at the top
+
+const app = express();
+const httpServer = createServer(app);
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "http://localhost:5173",
+  "http://localhost:8080",
+  "http://localhost:3000"
+].filter(Boolean);
+
+const io = new Server(httpServer, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+});
+
+const PORT = process.env.PORT || 3000;
+
+// Socket.io connection logic
+io.on("connection", (socket) => {
+  console.log("A user connected:", socket.id);
+
+  socket.on("join_order", (orderId) => {
+    socket.join(`order_${orderId}`);
+    console.log(`User joined order room: order_${orderId}`);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
+});
+
+// Make io accessible to routes
+app.set("io", io);
+
+// Middleware
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
+=======
 
 // Load environment variables
 dotenv.config();
@@ -34,6 +89,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
+>>>>>>> target/main
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(ensureUploadsDir);
@@ -65,6 +121,10 @@ app.use("/api/contact", contactRoutes);
 app.use("/api/media", mediaRoutes);
 app.use("/api/user-forms", userFormRoutes);
 app.use("/api", couponRoutes);
+<<<<<<< HEAD
+app.use("/api/payments", paymentRoutes);
+=======
+>>>>>>> target/main
 
 // 404 handler
 app.use((req, res) => {
@@ -80,7 +140,12 @@ app.use((err, req, res, next) => {
   res.status(500).json({
     success: false,
     message: "Internal server error",
+<<<<<<< HEAD
+    error: err?.message,
+    requestId: req.headers["x-request-id"] || undefined,
+=======
     error: process.env.NODE_ENV === "development" ? err.message : undefined,
+>>>>>>> target/main
   });
 });
 
@@ -91,6 +156,23 @@ async function startServer() {
     await sequelize.authenticate();
     console.log("✅ Connected to PostgreSQL via Sequelize");
 
+<<<<<<< HEAD
+    // Start listening
+    httpServer.listen(PORT, () => {
+      console.log(`🚀 Server is running on http://localhost:${PORT}`);
+      console.log(`📝 Environment: ${process.env.NODE_ENV || "development"}`);
+    });
+
+    (async () => {
+      try {
+        console.log("ℹ️ Starting database synchronization...");
+        await sequelize.sync({ alter: true });
+        console.log("✅ Database models synchronized");
+      } catch (err) {
+        console.error("❌ Database sync failed:", err?.message || err);
+      }
+    })();
+=======
     await sequelize.sync({ alter: true });
     console.log("✅ Database models synchronized");
 
@@ -99,6 +181,7 @@ async function startServer() {
       console.log(`🚀 Server is running on http://localhost:${PORT}`);
       console.log(`📝 Environment: ${process.env.NODE_ENV || "development"}`);
     });
+>>>>>>> target/main
   } catch (error) {
     console.error("❌ Failed to start server:", error);
     process.exit(1);

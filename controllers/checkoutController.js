@@ -16,7 +16,11 @@ export const validateCustomerInfo = [
     .withMessage("First name is required")
     .isLength({ min: 2, max: 100 })
     .withMessage("First name must be between 2 and 100 characters"),
+<<<<<<< HEAD
+
+=======
   
+>>>>>>> target/main
   body("lastName")
     .optional()
     .trim()
@@ -24,7 +28,11 @@ export const validateCustomerInfo = [
     .withMessage("Last name is required")
     .isLength({ min: 2, max: 100 })
     .withMessage("Last name must be between 2 and 100 characters"),
+<<<<<<< HEAD
+
+=======
   
+>>>>>>> target/main
   body("email")
     .optional()
     .trim()
@@ -32,7 +40,11 @@ export const validateCustomerInfo = [
     .withMessage("Email is required")
     .isEmail()
     .withMessage("Please provide a valid email"),
+<<<<<<< HEAD
+
+=======
   
+>>>>>>> target/main
   body("phone")
     .trim()
     .notEmpty()
@@ -57,14 +69,22 @@ export const validateCustomerDetails = [
     .withMessage("First name is required")
     .isLength({ min: 2, max: 100 })
     .withMessage("First name must be between 2 and 100 characters"),
+<<<<<<< HEAD
+
+=======
   
+>>>>>>> target/main
   body("lastName")
     .trim()
     .notEmpty()
     .withMessage("Last name is required")
     .isLength({ min: 2, max: 100 })
     .withMessage("Last name must be between 2 and 100 characters"),
+<<<<<<< HEAD
+
+=======
   
+>>>>>>> target/main
   body("email")
     .trim()
     .notEmpty()
@@ -109,7 +129,11 @@ export const validateShippingAddress = [
 export const getCheckoutData = async (req, res) => {
   try {
     const userId = req.user.id;
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> target/main
     // Get user's cart with product details
     const cart = await Cart.findAll({
       where: { userId },
@@ -118,11 +142,19 @@ export const getCheckoutData = async (req, res) => {
           model: Product,
           as: "product",
           attributes: [
+<<<<<<< HEAD
+            "id",
+            "name",
+            "description",
+            "price",
+            "featured_image",
+=======
             "id", 
             "name", 
             "description", 
             "price", 
             "featured_image", 
+>>>>>>> target/main
             "category",
             "stock",
             "is_available"
@@ -140,7 +172,11 @@ export const getCheckoutData = async (req, res) => {
     }
 
     // Check if all products are still available
+<<<<<<< HEAD
+    const unavailableProducts = cart.filter(item =>
+=======
     const unavailableProducts = cart.filter(item => 
+>>>>>>> target/main
       !item.product.is_available || item.product.stock < item.quantity
     );
 
@@ -512,7 +548,11 @@ export const getUserOrders = async (req, res) => {
     const formattedOrders = orders.map(order => {
       let shippingAddress = order.shippingAddress;
       let billingAddress = order.billingAddress;
+<<<<<<< HEAD
+
+=======
       
+>>>>>>> target/main
       // Try to parse addresses if they're strings
       try {
         if (typeof shippingAddress === 'string') {
@@ -522,7 +562,11 @@ export const getUserOrders = async (req, res) => {
         console.log("Failed to parse shippingAddress:", shippingAddress);
         shippingAddress = { address: "Invalid address format" };
       }
+<<<<<<< HEAD
+
+=======
       
+>>>>>>> target/main
       try {
         if (typeof billingAddress === 'string') {
           billingAddress = JSON.parse(billingAddress);
@@ -531,7 +575,11 @@ export const getUserOrders = async (req, res) => {
         console.log("Failed to parse billingAddress:", billingAddress);
         billingAddress = { address: "Invalid address format" };
       }
+<<<<<<< HEAD
+
+=======
       
+>>>>>>> target/main
       return {
         ...order.toJSON(),
         shippingAddress,
@@ -593,14 +641,24 @@ export const getCheckoutSession = async (req, res) => {
 
 export const placeOrder = async (req, res) => {
   const transaction = await sequelize.transaction();
+<<<<<<< HEAD
+
+  try {
+    const {
+=======
   
   try {
     const { 
+>>>>>>> target/main
       paymentMethod = "cod",
       orderNotes,
       couponCode
     } = req.body;
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> target/main
     const userId = req.user.id;
 
     // Get checkout session
@@ -695,7 +753,11 @@ export const placeOrder = async (req, res) => {
     const subtotal = cart.reduce((sum, item) => sum + parseFloat(item.totalPrice), 0);
     const shippingCost = 0;
     const tax = 0;
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> target/main
     // Apply coupon if provided
     let appliedCouponCode = null;
     let couponDiscount = 0;
@@ -794,8 +856,13 @@ export const placeOrder = async (req, res) => {
       lastName: checkoutSession.lastName,
       email: checkoutSession.email,
       phone: checkoutSession.phone,
+<<<<<<< HEAD
+      shippingAddress: checkoutSession.shippingAddress,
+      billingAddress: checkoutSession.billingAddress || checkoutSession.shippingAddress,
+=======
 shippingAddress: checkoutSession.shippingAddress,
 billingAddress: checkoutSession.billingAddress || checkoutSession.shippingAddress,
+>>>>>>> target/main
       paymentMethod,
       paymentStatus: "pending",
       orderNotes,
@@ -850,6 +917,15 @@ billingAddress: checkoutSession.billingAddress || checkoutSession.shippingAddres
         }
       } else {
         await Product.update(
+<<<<<<< HEAD
+          {
+            stock: sequelize.literal(`stock - ${cartItem.quantity}`),
+            views: sequelize.literal('views + 1')
+          },
+          {
+            where: { id: cartItem.productId },
+            transaction
+=======
           { 
             stock: sequelize.literal(`stock - ${cartItem.quantity}`),
             views: sequelize.literal('views + 1')
@@ -857,6 +933,7 @@ billingAddress: checkoutSession.billingAddress || checkoutSession.shippingAddres
           { 
             where: { id: cartItem.productId },
             transaction 
+>>>>>>> target/main
           }
         );
       }
@@ -869,6 +946,23 @@ billingAddress: checkoutSession.billingAddress || checkoutSession.shippingAddres
         { where: { code: appliedCouponCode }, transaction }
       );
     }
+<<<<<<< HEAD
+    // Clear user's cart (Only for COD or successful online payment)
+    if (paymentMethod !== "online") {
+      await Cart.destroy({
+        where: { userId },
+        transaction,
+      });
+    }
+
+    // Mark checkout session as completed
+    if (paymentMethod !== "online") {
+      await checkoutSession.update({
+        isCompleted: true,
+        currentStep: "completed",
+      }, { transaction });
+    }
+=======
     // Clear user's cart
     await Cart.destroy({
       where: { userId },
@@ -880,6 +974,7 @@ billingAddress: checkoutSession.billingAddress || checkoutSession.shippingAddres
       isCompleted: true,
       currentStep: "completed",
     }, { transaction });
+>>>>>>> target/main
 
     await transaction.commit();
 

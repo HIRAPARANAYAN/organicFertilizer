@@ -172,7 +172,74 @@ export const validateCouponForUser = async (req, res) => {
       }
     }
 
+<<<<<<< HEAD
+    // Fetch user's cart for eligibility and discount calculation
+    const cart = await Cart.findAll({
+      where: { userId },
+      include: [
+        {
+          model: Product,
+          as: "product",
+          attributes: ["id", "category"],
+        },
+      ],
+    });
+
+    const subtotal = cart.reduce((sum, item) => sum + parseFloat(item.totalPrice), 0);
+
+    // Check minimum subtotal
+    if (coupon.min_subtotal && parseFloat(coupon.min_subtotal) > subtotal) {
+      return res.status(400).json({
+        success: false,
+        message: `Minimum order amount of ₹${coupon.min_subtotal} required for this coupon`,
+        minSubtotal: coupon.min_subtotal,
+        currentSubtotal: subtotal
+      });
+    }
+
+    // Calculate eligible subtotal based on scope
+    let eligibleSubtotal = 0;
+    if (coupon.scope === "all") {
+      eligibleSubtotal = subtotal;
+    } else if (coupon.scope === "product" && Array.isArray(coupon.product_ids) && coupon.product_ids.length) {
+      eligibleSubtotal = cart
+        .filter(ci => coupon.product_ids.includes(ci.productId))
+        .reduce((s, ci) => s + parseFloat(ci.totalPrice), 0);
+    } else if (coupon.scope === "category" && Array.isArray(coupon.category_list) && coupon.category_list.length) {
+      eligibleSubtotal = cart
+        .filter(ci => coupon.category_list.includes(ci.product.category))
+        .reduce((s, ci) => s + parseFloat(ci.totalPrice), 0);
+    } else if (coupon.scope === "user") {
+      eligibleSubtotal = subtotal;
+    }
+
+    if (eligibleSubtotal <= 0) {
+      return res.status(400).json({ success: false, message: "Coupon is not applicable to any items in your cart" });
+    }
+
+    // Calculate discount amount
+    let discountAmount = 0;
+    if (coupon.discount_type === "percentage") {
+      discountAmount = (eligibleSubtotal * parseFloat(coupon.discount_value)) / 100;
+      if (coupon.max_discount) {
+        discountAmount = Math.min(discountAmount, parseFloat(coupon.max_discount));
+      }
+    } else {
+      discountAmount = Math.min(parseFloat(coupon.discount_value), eligibleSubtotal);
+    }
+
+    res.json({
+      success: true,
+      message: "Coupon validated successfully",
+      data: {
+        coupon,
+        discountAmount: parseFloat(discountAmount.toFixed(2)),
+        finalSubtotal: parseFloat((subtotal - discountAmount).toFixed(2))
+      }
+    });
+=======
     res.json({ success: true, data: coupon });
+>>>>>>> target/main
   } catch (error) {
     res.status(500).json({ success: false, message: "Failed to validate coupon", error: error.message });
   }

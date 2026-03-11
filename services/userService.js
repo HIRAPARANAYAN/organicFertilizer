@@ -1,12 +1,20 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+<<<<<<< HEAD
+import mailService from "./mailService.js";
+=======
+>>>>>>> target/main
 
 class UserService {
   // Register new user (role: user)
   async register(userData) {
     console.log("Registration attempt with data:", userData);
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> target/main
     const { name, email, password, phone, address, role } = userData;
 
     // Check if user already exists
@@ -30,7 +38,11 @@ class UserService {
       address,
       role: "user"
     });
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> target/main
     const user = await User.create({
       name,
       email,
@@ -39,7 +51,11 @@ class UserService {
       address,
       role: "user", // Always normalize to "user" for consistency
     });
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> target/main
     console.log("User created successfully:", user.id);
 
     // Generate JWT token
@@ -48,7 +64,11 @@ class UserService {
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRE || "7d" }
     );
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> target/main
     console.log("Token generated successfully");
 
     return {
@@ -234,8 +254,22 @@ class UserService {
       throw new Error("Admin not found");
     }
 
+<<<<<<< HEAD
+    const { name, email } = adminData;
+
+    // If email is being changed, check if it's already taken
+    if (email && email !== admin.email) {
+      const existingUser = await User.findOne({ where: { email } });
+      if (existingUser) {
+        throw new Error("Email is already in use");
+      }
+    }
+
+    await admin.update({ name, email });
+=======
     const { name } = adminData;
     await admin.update({ name });
+>>>>>>> target/main
 
     return {
       id: admin.id,
@@ -245,6 +279,88 @@ class UserService {
       updatedAt: admin.updatedAt,
     };
   }
+<<<<<<< HEAD
+
+  // Forgot password - Generate OTP and send email
+  async forgotPassword(email, role = "user") {
+    // Check if user/admin exists
+    const user = await User.findOne({ where: { email, role } });
+    if (!user) {
+      throw new Error(`${role.charAt(0).toUpperCase() + role.slice(1)} with this email does not exist`);
+    }
+
+    // Generate a 6-digit numeric OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+
+    await user.update({
+      reset_password_token: otp,
+      reset_password_expires: expires,
+    });
+
+    // Send email
+    await mailService.sendOTPEmail(email, otp);
+
+    return {
+      message: "OTP has been sent to your email",
+    };
+  }
+
+  // Verify OTP
+  async verifyOTP(email, otp, role = "user") {
+    const user = await User.findOne({ where: { email, role } });
+    if (!user) {
+      throw new Error(`${role.charAt(0).toUpperCase() + role.slice(1)} not found`);
+    }
+
+    if (!user.reset_password_token || user.reset_password_token !== otp) {
+      throw new Error("Invalid OTP");
+    }
+
+    if (new Date() > user.reset_password_expires) {
+      throw new Error("OTP has expired");
+    }
+
+    return {
+      success: true,
+      message: "OTP verified successfully",
+    };
+  }
+
+  // Reset password
+  async resetPassword(email, otp, newPassword, role = "user") {
+    const user = await User.findOne({ where: { email, role } });
+    if (!user) {
+      throw new Error(`${role.charAt(0).toUpperCase() + role.slice(1)} not found`);
+    }
+
+    // Verify OTP again for security
+    if (!user.reset_password_token || user.reset_password_token !== otp) {
+      throw new Error("Invalid or expired OTP");
+    }
+
+    if (new Date() > user.reset_password_expires) {
+      throw new Error("OTP has expired");
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update password and clear OTP fields
+    await user.update({
+      password: hashedPassword,
+      reset_password_token: null,
+      reset_password_expires: null,
+    });
+
+    return {
+      success: true,
+      message: "Password has been reset successfully",
+    };
+  }
+=======
+>>>>>>> target/main
 }
 
 export default new UserService();

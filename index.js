@@ -2,6 +2,11 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { sequelize } from "./config/sequelize.js";
+
+// Load env FIRST
+dotenv.config();
+
+// Import models
 import "./models/User.js";
 import "./models/Product.js";
 import "./models/Cart.js";
@@ -23,11 +28,10 @@ import adminCustomerRoutes from "./routes/adminCustomerRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
 import mediaRoutes from "./routes/mediaRoutes.js";
 import userFormRoutes from "./routes/userFormRoutes.js";
-import ensureUploadsDir from "./middleware/upload.js";
 import couponRoutes from "./routes/couponRoutes.js";
 
-// Load environment variables
-dotenv.config();
+// Middleware import
+import ensureUploadsDir from "./middleware/upload.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -40,18 +44,18 @@ app.use(ensureUploadsDir);
 
 // Routes
 app.get("/", (req, res) => {
-  res.json({
-    success: true,
-    message: "Welcome to E-commerce Backend API",
-    version: "1.0.0",
-  });
+res.json({
+success: true,
+message: "Welcome to E-commerce Backend API",
+version: "1.0.0",
+});
 });
 
 app.get("/health", (req, res) => {
-  res.json({
-    success: true,
-    message: "Server is running",
-  });
+res.json({
+success: true,
+message: "Server is running",
+});
 });
 
 // API Routes
@@ -68,54 +72,60 @@ app.use("/api", couponRoutes);
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "Route not found",
-  });
+res.status(404).json({
+success: false,
+message: "Route not found",
+});
 });
 
 // Error handler
 app.use((err, req, res, next) => {
-  console.error("Error:", err);
-  res.status(500).json({
-    success: false,
-    message: "Internal server error",
-    error: process.env.NODE_ENV === "development" ? err.message : undefined,
-  });
+console.error("Error:", err);
+res.status(500).json({
+success: false,
+message: "Internal server error",
+error: process.env.NODE_ENV === "development" ? err.message : undefined,
+});
 });
 
 // Start server
 async function startServer() {
-  try {
-    // Connect and sync models
-    await sequelize.authenticate();
-    console.log("✅ Connected to PostgreSQL via Sequelize");
+try {
+await sequelize.authenticate();
+console.log("✅ Connected to PostgreSQL via Sequelize");
 
-    await sequelize.sync({ alter: true });
-    console.log("✅ Database models synchronized");
+```
+if (process.env.NODE_ENV === "development") {
+  await sequelize.sync({ alter: true });
+} else {
+  await sequelize.sync();
+}
 
-    // Start listening
-    app.listen(PORT, () => {
-      console.log(`🚀 Server is running on http://localhost:${PORT}`);
-      console.log(`📝 Environment: ${process.env.NODE_ENV || "development"}`);
-    });
-  } catch (error) {
-    console.error("❌ Failed to start server:", error);
-    process.exit(1);
-  }
+console.log("✅ Database models synchronized");
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📝 Environment: ${process.env.NODE_ENV}`);
+});
+```
+
+} catch (error) {
+console.error("❌ Failed to start server:", error);
+process.exit(1);
+}
 }
 
 startServer();
 
 // Graceful shutdown
 process.on("SIGINT", async () => {
-  console.log("\n🛑 Shutting down server...");
-  await sequelize.close();
-  process.exit(0);
+console.log("🛑 Shutting down...");
+await sequelize.close();
+process.exit(0);
 });
 
 process.on("SIGTERM", async () => {
-  console.log("\n🛑 Shutting down server...");
-  await sequelize.close();
-  process.exit(0);
+console.log("🛑 Shutting down...");
+await sequelize.close();
+process.exit(0);
 });

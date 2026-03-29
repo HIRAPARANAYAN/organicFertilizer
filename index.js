@@ -30,7 +30,7 @@ import mediaRoutes from "./routes/mediaRoutes.js";
 import userFormRoutes from "./routes/userFormRoutes.js";
 import couponRoutes from "./routes/couponRoutes.js";
 
-// Middleware import
+// Middleware
 import ensureUploadsDir from "./middleware/upload.js";
 
 const app = express();
@@ -92,7 +92,7 @@ error: process.env.NODE_ENV === "development" ? err.message : undefined,
 async function startServer() {
 try {
 await sequelize.authenticate();
-console.log("✅ Connected to PostgreSQL via Sequelize");
+console.log("Connected to PostgreSQL");
 
 ```
 if (process.env.NODE_ENV === "development") {
@@ -101,16 +101,16 @@ if (process.env.NODE_ENV === "development") {
   await sequelize.sync();
 }
 
-console.log("✅ Database models synchronized");
+console.log("Database models synchronized");
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📝 Environment: ${process.env.NODE_ENV}`);
+  console.log("Server running on port " + PORT);
+  console.log("Environment: " + process.env.NODE_ENV);
 });
 ```
 
 } catch (error) {
-console.error("❌ Failed to start server:", error);
+console.error("Failed to start server:", error);
 process.exit(1);
 }
 }
@@ -119,13 +119,13 @@ startServer();
 
 // Graceful shutdown
 process.on("SIGINT", async () => {
-console.log("🛑 Shutting down...");
+console.log("Shutting down server...");
 await sequelize.close();
 process.exit(0);
 });
 
 process.on("SIGTERM", async () => {
-console.log("🛑 Shutting down...");
+console.log("Shutting down server...");
 await sequelize.close();
 process.exit(0);
 });

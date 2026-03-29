@@ -98,7 +98,7 @@ console.log("Connected to PostgreSQL");
 if (process.env.NODE_ENV === "development") {
   await sequelize.sync({ alter: true });
 } else {
-  await sequelize.sync();
+  // await sequelize.sync();
 }
 
 console.log("Database models synchronized");

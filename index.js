@@ -1,12 +1,13 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import fs from "fs";
 import { sequelize } from "./config/sequelize.js";
 
-// Load env FIRST
+// Load environment variables immediately
 dotenv.config();
 
-// Import models
+// Import models (Order matters for associations)
 import "./models/User.js";
 import "./models/Product.js";
 import "./models/Cart.js";
@@ -30,32 +31,36 @@ import mediaRoutes from "./routes/mediaRoutes.js";
 import userFormRoutes from "./routes/userFormRoutes.js";
 import couponRoutes from "./routes/couponRoutes.js";
 
-// Middleware
-import ensureUploadsDir from "./middleware/upload.js";
-
 const app = express();
+// Render assigns a dynamic port; 3000 is just a local fallback
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+// --- 1. SETUP UPLOADS DIRECTORY (Run once at startup) ---
+const uploadsDir = "uploads";
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+    console.log("✅ Created uploads directory");
+}
+
+// --- 2. MIDDLEWARE ---
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(ensureUploadsDir);
 
-// Routes
+// Serve the uploads folder statically so you can view images
+app.use("/uploads", express.static("uploads"));
+
+// --- 3. ROUTES ---
 app.get("/", (req, res) => {
-res.json({
-success: true,
-message: "Welcome to E-commerce Backend API",
-version: "1.0.0",
-});
+    res.json({
+        success: true,
+        message: "Welcome to E-commerce Backend API",
+        version: "1.0.0",
+    });
 });
 
 app.get("/health", (req, res) => {
-res.json({
-success: true,
-message: "Server is running",
-});
+    res.json({ success: true, message: "Server is healthy" });
 });
 
 // API Routes
@@ -70,62 +75,55 @@ app.use("/api/media", mediaRoutes);
 app.use("/api/user-forms", userFormRoutes);
 app.use("/api", couponRoutes);
 
+// --- 4. ERROR HANDLING ---
 // 404 handler
 app.use((req, res) => {
-res.status(404).json({
-success: false,
-message: "Route not found",
-});
+    res.status(404).json({
+        success: false,
+        message: "Route not found",
+    });
 });
 
-// Error handler
+// Global Error handler
 app.use((err, req, res, next) => {
-console.error("Error:", err);
-res.status(500).json({
-success: false,
-message: "Internal server error",
-error: process.env.NODE_ENV === "development" ? err.message : undefined,
-});
+    console.error("Internal Error:", err);
+    res.status(500).json({
+        success: false,
+        message: "Internal server error",
+        error: process.env.NODE_ENV === "development" ? err.message : undefined,
+    });
 });
 
-// Start server
+// --- 5. SERVER STARTUP ---
 async function startServer() {
-try {
-await sequelize.authenticate();
-console.log("Connected to PostgreSQL");
+    try {
+        await sequelize.authenticate();
+        console.log("✅ Connected to PostgreSQL");
 
-```
-if (process.env.NODE_ENV === "development") {
-  await sequelize.sync({ alter: true });
-} else {
-  // await sequelize.sync();
-}
+        // Sync models only in development or if explicitly needed
+        if (process.env.NODE_ENV === "development") {
+            await sequelize.sync({ alter: true });
+            console.log("🔄 Database synchronized (Alter Mode)");
+        }
 
-console.log("Database models synchronized");
-
-app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
-  console.log("Environment: " + process.env.NODE_ENV);
-});
-```
-
-} catch (error) {
-console.error("Failed to start server:", error);
-process.exit(1);
-}
+        app.listen(PORT, () => {
+            console.log(`🚀 Server running on port ${PORT}`);
+            console.log(`🌍 Environment: ${process.env.NODE_ENV || 'production'}`);
+        });
+    } catch (error) {
+        console.error("❌ Failed to start server:", error);
+        process.exit(1);
+    }
 }
 
 startServer();
 
-// Graceful shutdown
-process.on("SIGINT", async () => {
-console.log("Shutting down server...");
-await sequelize.close();
-process.exit(0);
-});
+// --- 6. GRACEFUL SHUTDOWN ---
+const shutdown = async () => {
+    console.log("Shutting down gracefully...");
+    await sequelize.close();
+    process.exit(0);
+};
 
-process.on("SIGTERM", async () => {
-console.log("Shutting down server...");
-await sequelize.close();
-process.exit(0);
-});
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
